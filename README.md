@@ -114,6 +114,9 @@ DMing the bot is its main use and all features work in the App's Messages window
 
 ### Generating Images with DALL-E
 
+<img src="https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/Dall-e%20function.jpeg" <img src="path/to/image.jpg" width="500" height="300">
+
+
 To generate an image with DALL-E, send a message in the following format:
 
 ```
