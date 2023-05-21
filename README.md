@@ -23,6 +23,32 @@ Before you can use the OpenAI ChatGPT Slackbot, you need to set up and configure
 3. Slack Bolt for Python (slack_bolt) 1.9.1 or later
 4. Python-dotenv (python-dotenv) 0.19.1 or later
 
+### Slack bot and App scopes
+        "scopes": {
+            "bot": [
+                "app_mentions:read",
+                "channels:history",
+                "channels:join",
+                "chat:write",
+                "commands",
+                "files:write",
+                "groups:history",
+                "im:history",
+                "im:read",
+                "im:write",
+                "incoming-webhook",
+                "mpim:history",
+                "users:read",
+                "workflow.steps:execute",
+                "files:read"
+
+            "bot_events": [
+                "app_home_opened",
+                "app_mention",
+                "message.channels",
+                "message.im",
+                "workflow_step_execute"
+
 ### Installation
 
 1. Clone the repository
