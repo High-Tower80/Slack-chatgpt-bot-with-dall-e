@@ -2,7 +2,7 @@
 # OpenAI ChatGPT Slackbot
 
 A powerful Slackbot app built with OpenAI's GPT-4 (switch to 3.5-turbo in main.py if you dont have beta access) language model and DALL-E image generation API. This app allows users to interact with GPT-4 directly from Slack. It also supports generating images with DALL-E by giving a text prompt and saves it to the slackbot's DM.
-![Example Image]
+
 
 ## Features
 
@@ -114,7 +114,7 @@ DMing the bot is its main use and all features work in the App's Messages window
 
 ### Generating Images with DALL-E
 
-<img src="https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/Dall-e%20function.jpeg" <img src="path/to/image.jpg" width="500" height="300">
+<img src="[path/to/image.jpg](https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/Dall-e%20function.jpeg)" width="500" height="300">
 
 
 To generate an image with DALL-E, send a message in the following format:
