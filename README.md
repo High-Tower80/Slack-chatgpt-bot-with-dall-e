@@ -97,6 +97,8 @@ python main.py
 
 ## Usage
 
+https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/GPT%20problemsolving%20in%20slack.png
+
 ### Interacting with GPT-4 or 3.5-turbo
 
 KNOWN ISSUE: To interact with GPT-4 in a channel, mention the bot with your message
@@ -113,7 +115,6 @@ DMing the bot is its main use and all features work in the App's Messages window
 ```
 
 ### Generating Images with DALL-E
-<img src="https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/Dall-e%20function.jpeg" width="500" height="300">
 
 
 To generate an image with DALL-E, send a message in the following format:
