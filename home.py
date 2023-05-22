@@ -27,7 +27,7 @@ def build_app_home_blocks():
 			},
 			"accessory": {
 				"type": "image",
-				"https://google.com"
+				"https://google.com",
 				"alt_text": "Version"
 			}
 		},
