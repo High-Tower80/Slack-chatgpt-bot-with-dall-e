@@ -5,7 +5,6 @@ A powerful Slackbot app built with OpenAI's GPT-4 (switch to 3.5-turbo in main.p
 
 ![Example Image](https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/slackgpt%20image2.jpeg)![Example Image](https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/Slackgpt%20summary.png)
 
-
 ## Features
 
 1. Directly chat with GPT-4 from your Slack workspace.
