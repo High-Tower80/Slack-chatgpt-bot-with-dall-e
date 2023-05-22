@@ -3,7 +3,7 @@
 
 A powerful Slackbot app built with OpenAI's GPT-4 (switch to 3.5-turbo in main.py if you dont have beta access) language model and DALL-E image generation API. This app allows users to interact with GPT-4 directly from Slack. It also supports generating images with DALL-E by giving a text prompt and saves it to the slackbot's DM.
 
-
+![Example Image](https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/Dall-e%20dog.png)
 ## Features
 
 1. Directly chat with GPT-4 from your Slack workspace.
@@ -96,7 +96,8 @@ python main.py
 ```
 
 ## Usage
-![Example Image](GPT problemsolving in slack.png)
+![Example Image](https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/GPT%20problemsolving%20in%20slack.png)
+
 
 
 ### Interacting with GPT-4 or 3.5-turbo
