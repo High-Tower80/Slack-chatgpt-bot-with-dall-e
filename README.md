@@ -96,8 +96,8 @@ python main.py
 ```
 
 ## Usage
+![Example Image]([https://example.com/example.jpg](https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/GPT%20problemsolving%20in%20slack.png))
 
-https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/GPT%20problemsolving%20in%20slack.png
 
 ### Interacting with GPT-4 or 3.5-turbo
 
