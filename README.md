@@ -123,6 +123,7 @@ To generate an image with DALL-E, send a message in the following format:
 
 ```
 image: Your image description here
+
 ![Example Image](https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/SCR-20230521-pequ.jpeg)
 ```
 
