@@ -1,7 +1,9 @@
 # Slack-chatgpt-bot-with-dall-e
 # OpenAI ChatGPT Slackbot
+** NEWLY ADDED PDF UPload and chat function ***
 
-A powerful Slackbot app built with OpenAI's GPT-4 (switch to 3.5-turbo in main.py if you dont have beta access) language model and DALL-E image generation API. This app allows users to interact with GPT-4 directly from Slack. It also supports generating images with DALL-E by giving a text prompt and saves it to the slackbot's DM.
+A powerful Slackbot app built with OpenAI's GPT-4o (switch to any model in .env) language model and DALL-E3 image generation API. This app allows users to interact with GPT-4o directly from Slack. It also supports generating images with DALL-E by giving a text prompt and saves it to the slackbot's DM.
+
 
 ![Example Image](https://github.com/High-Tower80/Slack-chatgpt-bot-with-dall-e/blob/main/slackgpt%20image2.jpeg)
 
@@ -9,9 +11,8 @@ A powerful Slackbot app built with OpenAI's GPT-4 (switch to 3.5-turbo in main.p
 
 ## Features
 
-1. Directly chat with GPT-4 from your Slack workspace.
+1. Directly chat with GPT-4o from your Slack workspace.
 2. Generate DALL-E images with a text prompt.
-3. Automatically update the App Home tab with a block kit structure.
 4. Handle bot mentions and direct messages.
 5. Maintain chat history to provide context for future prompts.
 6. URL shortener for image URLs.
