@@ -25,13 +25,8 @@ from functools import wraps
 from PyPDF2 import PdfReader
 import json
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()]
-)
-
-from dotenv import load_dotenv
+# Force reload of environment variables
+os.environ.clear()
 load_dotenv(override=True)
 
 # Update logging configuration
@@ -45,6 +40,11 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 file_handler = logging.FileHandler('bot.log')
 file_handler.setFormatter(formatter)
 file_handler.setLevel(logging.INFO)
+
+# Error log file - capture actual errors
+error_handler = logging.FileHandler('bot.error.log')
+error_handler.setFormatter(formatter)
+error_handler.setLevel(logging.ERROR)
 
 # Add handlers to logger
 logger.addHandler(file_handler)
@@ -121,12 +121,13 @@ def log_interaction_to_sheet(user_id, interaction, gpt_reply, channel_id=None, e
 			logger.error(f"Google Sheets credentials not found at {creds_path}")
 			return
 
+		creds_json = json.loads(get_env('GOOGLE_SHEETS_CREDS'))
 		scope = ["https://spreadsheets.google.com/feeds",
 				"https://www.googleapis.com/auth/spreadsheets",
 				"https://www.googleapis.com/auth/drive.file",
 				"https://www.googleapis.com/auth/drive"]
-
-		creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
+				
+		creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
 		client = gspread.authorize(creds)
 		sheet = client.open("Slackbot ChatGPT Logs").sheet1
 		
