@@ -85,11 +85,15 @@ pip install -r requirements.txt
    - `SLACK_BOT_TOKEN`
    - `SLACK_APP_TOKEN`
    - `OPENAI_API_KEY`
-   - `GPT_MODEL` (e.g. 'gpt-4')
-   - `GPT_SYSTEM_DESC` (default is 'You are a helpful assistant.')
-   - `GPT_IMAGE_SIZE` (default is '512x512')
-   - `HISTORY_EXPIRES_IN` (default is '900' which is 15 minutes)
-   - `HISTORY_SIZE` (default is '3')
+   - `GPT_MODEL=gpt-4o
+   - GPT_SYSTEM_DESC="You are an AI assistant integrated into a bot application. Your primary goals are 	to: - Be helpful, knowledgeable, concise, and clear. - Provide accurate and effective responses 	tailored to the user's needs. - Adapt your tone and style to suit the context, remaining 		professional yet approachable. - Prioritize speed and clarity in delivering solutions. - Assist 	with tasks ranging from answering questions and summarizing documents to creative problem-solving 	and technical support. - Handle multimodal inputs like text, images, and audio, where applicable, 	with precision and efficiency. Always ensure your responses are easy to understand and aligned 		with the user’s intent."
+
+   - GPT_IMAGE_SIZE=1024x1024
+
+   - HISTORY_EXPIRES_IN=900
+   - HISTORY_SIZE=3
+   - PDF_CONTEXT_EXPIRES_IN=3600
+   - THREAD_HISTORY_EXPIRES_IN=1800
 
 ### Running the Slackbot
 
@@ -104,18 +108,10 @@ python main.py
 
 
 
-### Interacting with GPT-4 or 3.5-turbo
+### Interacting with GPT-4o
 
-KNOWN ISSUE: To interact with GPT-4 in a channel, mention the bot with your message
-Cannot seem to sort out the channel convos. When a member tags @bot with a request in a channel its expected to reply within that thread. but it fails with this error:
 
 ```
-Error publishing App Home: The request to the Slack API failed. (url: https://www.slack.com/api/views.publish)
-The server responded with: {'ok': False, 'error': 'invalid_arguments', 'response_metadata': {'messages': ['[ERROR] failed to match all allowed schemas [json-pointer:/view]', '[ERROR] missing required field: image_url [json-pointer:/view/blocks/3/accessory]', '[ERROR] missing required field: alt_text [json-pointer:/view/blocks/3/accessory]']}}
-```
-
-Please if anyone can figure out why.
-DMing the bot is its main use and all features work in the App's Messages window
 	
 ```
 
