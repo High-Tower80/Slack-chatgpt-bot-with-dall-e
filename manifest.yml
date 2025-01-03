@@ -1,74 +1,60 @@
 {
-	"display_information": {
-		"name": "ChatGPT",
-		"description": "Let me help you with that!",
-		"background_color": "#131314",
-		"long_description": "ChatGPT is a computer program that has been designed to communicate with humans in natural language. It was created by a team of experts in computer science, linguistics, and artificial intelligence. \r\n\r\n:robot_face: *To use ChatGPT* directly message it from the App's Messages window.\r\nEx: ```write me an email newsletter about upcoming exciting company news. Mention: Long Beach Walls Event on June 15```\r\n\r\n:frame_with_picture:*DALL-E Integration*: Type \"image:\" then your prompt!\r\nEx: ```image: puppy at sunset```\r\n\r\n"
-	},
-	"features": {
-		"app_home": {
-			"home_tab_enabled": true,
-			"messages_tab_enabled": true,
-			"messages_tab_read_only_enabled": false
-		},
-		"bot_user": {
-			"display_name": "ChatGPT",
-			"always_online": true
-		},
-		"slash_commands": [
-			{
-				"command": "/chatgpt",
-				"description": "craft msgs, ask Qs and more",
-				"usage_hint": "[image:] for pics",
-				"should_escape": false
-			}
-		],
-		"workflow_steps": [
-			{
-				"name": "Ask AI",
-				"callback_id": "start_gpt"
-			}
-		]
-	},
-	"oauth_config": {
-		"redirect_urls": [
-			"www.google.com"
-		],
-		"scopes": {
-			"bot": [
-				"app_mentions:read",
-				"channels:history",
-				"channels:join",
-				"chat:write",
-				"commands",
-				"files:write",
-				"groups:history",
-				"im:history",
-				"im:read",
-				"im:write",
-				"incoming-webhook",
-				"mpim:history",
-				"users:read",
-				"workflow.steps:execute",
-				"files:read"
-			]
-		}
-	},
-	"settings": {
-		"event_subscriptions": {
-			"bot_events": [
-				"app_home_opened",
-				"app_mention",
-				"message.channels",
-				"message.im",
-				"workflow_step_execute"
-			]
-		},
-		"interactivity": {
-			"is_enabled": true
-		},
-		"org_deploy_enabled": false,
-		"socket_mode_enabled": true,
-		"token_rotation_enabled": false
-	}
+    "display_information": {
+        "name": "ChatGPT",
+        "description": "Intertrend's AI Slackbot!",
+        "background_color": "#000000",
+        "long_description": "*Now updated to GPT-4o!* (5/15/24)\r\nGPT-4o (“o” for “omni”) is OpenAI's most advanced model. It has the same high intelligence as GPT-4 Turbo but it generates text 2x faster and is 50% cheaper. It's knowledge goes up to October 2023.\r\n\r\n*<https://renzei.slack.com/docs/T06NB5Y7J/F0738S7FBFZ|:noto-robot: Basics of Using ChatGPT and AI>*\r\n\r\n:slack_sparkle: *To use ChatGPT* directly message it from the App's Messages window.\r\nEx: ```write me an email newsletter about upcoming exciting company news. Mention: Long Beach Walls Event on June 15```\r\n\r\n:frame_with_picture: *DALL-E Integration* : Type \"image:\" then your prompt!\r\nEx: ```image: puppy at sunset```\r\n\r\n<https://docs.google.com/document/d/1ndIc9tArln2_EdgNs4mCbfGU73ha1I1yyLJpH6yJ3IY/edit?usp=sharing|Helpful Prompt Examples and Resources>"
+    },
+    "features": {
+        "app_home": {
+            "home_tab_enabled": false,
+            "messages_tab_enabled": true,
+            "messages_tab_read_only_enabled": false
+        },
+        "bot_user": {
+            "display_name": "ChatGPT",
+            "always_online": true
+        }
+    },
+    "oauth_config": {
+        "redirect_urls": [
+            "https://script.google.com/a/macros/example.com"
+        ],
+        "scopes": {
+            "bot": [
+                "app_mentions:read",
+                "canvases:read",
+                "canvases:write",
+                "channels:history",
+                "channels:join",
+                "chat:write",
+                "files:read",
+                "files:write",
+                "groups:history",
+                "im:history",
+                "im:read",
+                "im:write",
+                "incoming-webhook",
+                "mpim:history",
+                "users:read",
+                "workflow.steps:execute"
+            ]
+        }
+    },
+    "settings": {
+        "event_subscriptions": {
+            "bot_events": [
+                "app_mention",
+                "file_shared",
+                "message.channels",
+                "message.im"
+            ]
+        },
+        "interactivity": {
+            "is_enabled": true
+        },
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": true,
+        "token_rotation_enabled": false
+    }
 }
