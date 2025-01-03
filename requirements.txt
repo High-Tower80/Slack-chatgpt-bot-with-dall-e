@@ -1,6 +1,3 @@
-
-# Core dependencies
-slack-bolt
 slack-sdk
 python-dotenv
 openai
