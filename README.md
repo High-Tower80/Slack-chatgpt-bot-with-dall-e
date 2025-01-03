@@ -1,4 +1,4 @@
-# Slack-chatgpt-bot-with-dall-e
+# Slackbot-with-chatgpt-dalle3-pdf-analyzer
 # OpenAI ChatGPT Slackbot
 ** NEWLY ADDED PDF UPload and chat function ***
 
@@ -13,9 +13,9 @@ A powerful Slackbot app built with OpenAI's GPT-4o (switch to any model in .env)
 
 1. Directly chat with GPT-4o from your Slack workspace.
 2. Generate DALL-E images with a text prompt.
-4. Handle bot mentions and direct messages.
-5. Maintain chat history to provide context for future prompts.
-6. URL shortener for image URLs.
+4. Upload PDFS direct to slack and ask it questions ala chatgpt plus
+5. Extract Text and insightsnfrom PDFs
+6. Maintain chat history to provide context for future prompts.
 
 ## Getting Started
 
