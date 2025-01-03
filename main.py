@@ -1,11 +1,3 @@
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route("/")
-def hello():
-    return "Hello, Railway!"
-	
 import os
 import random
 import sys
@@ -33,8 +25,13 @@ from functools import wraps
 from PyPDF2 import PdfReader
 import json
 
-# Force reload of environment variables
-os.environ.clear()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()]
+)
+
+from dotenv import load_dotenv
 load_dotenv(override=True)
 
 # Update logging configuration
