@@ -8,3 +8,5 @@ gspread
 oauth2client
 requests
 PyPDF2
+flask
+gunicorn
