@@ -1,37 +1,70 @@
-import os
-import random
-import sys
-import requests
-import gspread
-import openai
-import tempfile
-import io
-from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime, timedelta, timezone
-from typing import Optional
-from urllib.request import urlopen
-from flask import Response
-from dotenv import load_dotenv
-from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
 import logging
-from logging.handlers import RotatingFileHandler
 import traceback
-import time
-import threading
-from functools import wraps
-from PyPDF2 import PdfReader
-import json
+import sys
+
+# Enhanced logging setup
+logging.basicConfig(
+	level=logging.INFO,
+	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+	stream=sys.stdout
+)
+logger = logging.getLogger(__name__)
+
+# Log all import attempts
+logger.info("Starting imports...")
+
+try:
+	logger.info("Importing slack-bolt...")
+	from slack_bolt import App
+	from slack_bolt.adapter.socket_mode import SocketModeHandler
+	
+	logger.info("Importing Google packages...")
+	import gspread
+	from oauth2client.service_account import ServiceAccountCredentials
+	
+	logger.info("Importing PDF packages...")
+	from PyPDF2 import PdfReader
+	
+	logger.info("Importing standard libraries...")
+	import os
+	import json
+	from datetime import datetime, timezone, timedelta
+	import tempfile
+	import requests
+	
+	logger.info("All imports successful!")
+except ImportError as e:
+	logger.error(f"Import Error: {str(e)}")
+	logger.error(traceback.format_exc())
+	raise
 
 # Force reload of environment variables
 os.environ.clear()
 load_dotenv(override=True)
 
-# Update logging configuration
+# Initialize logging first
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('slack_bot')
+logger = logging.getLogger(__name__)
+
+# Initialize the Slack app
+app = App(token=os.getenv("SLACK_BOT_TOKEN"))
+
+# Google Sheets setup with better error handling
+try:
+	creds_json = json.loads(os.getenv('GOOGLE_SHEETS_CREDS'))
+	scope = ["https://spreadsheets.google.com/feeds",
+			"https://www.googleapis.com/auth/spreadsheets",
+			"https://www.googleapis.com/auth/drive.file",
+			"https://www.googleapis.com/auth/drive"]
+			
+	creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
+	client = gspread.authorize(creds)
+	sheet = client.open("Slackbot ChatGPT Logs").sheet1
+	logger.info("Successfully connected to Google Sheets")
+	
+except Exception as e:
+	logger.error(f"Error setting up Google Sheets: {str(e)}")
+	logger.error(traceback.format_exc())
 
 # File handlers with proper formatting
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -847,8 +880,13 @@ def cli_test():
 if __name__ == '__main__':
 	try:
 		clear_all_caches()  # Clear caches on startup
-		handler = SocketModeHandler(app, SLACK_APP_TOKEN)
-		handler.start()
+		# Use Socket Mode when running locally
+		if os.getenv("RAILWAY_STATIC_URL"):
+			# Running on Railway - use HTTP
+			app.start(port=int(os.getenv("PORT", 8080)))
+		else:
+			# Running locally - use Socket Mode
+			SocketModeHandler(app, os.getenv("SLACK_APP_TOKEN")).start()
 	except Exception as e:
 		logger.error(f"Fatal error: {str(e)}")
 		logger.error(traceback.format_exc())
