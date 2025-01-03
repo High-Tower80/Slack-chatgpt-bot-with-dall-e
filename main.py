@@ -3,7 +3,6 @@ import logging
 import os
 from flask import Flask, request, jsonify
 from slack_bolt.adapter.flask import SlackRequestHandler
-from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 # Force stdout logging
 logging.basicConfig(
@@ -28,19 +27,21 @@ print("Current working directory:", os.getcwd())
 
 # Initialize Flask app
 flask_app = Flask(__name__)
-handler = SlackRequestHandler(flask_app)
+handler = SlackRequestHandler(app)
 
-@flask_app.route("/slack/events", methods=["POST"])
+@flask_app.route("/", methods=["GET"])
+def hello():
+    return jsonify({"message": "Choo Choo! Welcome to your Flask app 🚅"})
+
+@flask_app.route("/slack/events", methods=["POST", "GET"])
 def slack_events():
-    logger.info("Received slack event")
-    return handler.handle(request)
-
-# For Slack's URL verification
-@flask_app.route("/slack/events", methods=["POST"])
-def endpoint():
+    # Handle URL verification
     if request.json and request.json.get("type") == "url_verification":
         logger.info("Handling URL verification challenge")
-        return jsonify({"challenge": request.json["challenge"]})
+        return jsonify({"challenge": request.json.get("challenge")})
+    
+    # Handle other events
+    logger.info(f"Received slack event: {request.json}")
     return handler.handle(request)
 
 if __name__ == "__main__":
