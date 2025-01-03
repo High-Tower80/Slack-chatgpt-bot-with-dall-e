@@ -46,11 +46,6 @@ file_handler = logging.FileHandler('bot.log')
 file_handler.setFormatter(formatter)
 file_handler.setLevel(logging.INFO)
 
-# Error log file - capture actual errors
-error_handler = logging.FileHandler('bot.error.log')
-error_handler.setFormatter(formatter)
-error_handler.setLevel(logging.ERROR)
-
 # Add handlers to logger
 logger.addHandler(file_handler)
 logger.addHandler(error_handler)
