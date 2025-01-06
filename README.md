@@ -40,13 +40,14 @@ Before you can use the OpenAI ChatGPT Slackbot, you need to set up and configure
 4. Python-dotenv (python-dotenv) 0.19.1 or later
 
 ### Slack bot and App scopes
-        "scopes": {
-            "bot": [
+          "bot": [
                 "app_mentions:read",
+                "canvases:read",
+                "canvases:write",
                 "channels:history",
                 "channels:join",
                 "chat:write",
-                "commands",
+                "files:read",
                 "files:write",
                 "groups:history",
                 "im:history",
@@ -55,15 +56,13 @@ Before you can use the OpenAI ChatGPT Slackbot, you need to set up and configure
                 "incoming-webhook",
                 "mpim:history",
                 "users:read",
-                "workflow.steps:execute",
-                "files:read"
+                "workflow.steps:execute"
 
             "bot_events": [
-                "app_home_opened",
                 "app_mention",
+                "file_shared",
                 "message.channels",
-                "message.im",
-                "workflow_step_execute"
+                "message.im"
 
 ### Installation
 
