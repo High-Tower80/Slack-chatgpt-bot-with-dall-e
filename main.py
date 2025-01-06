@@ -91,6 +91,10 @@ pdf_contexts = {}
 pdf_processing_lock = {}
 last_success_messages = {}  # Track last success message per channel
 
+# New global variables
+last_request_datetime = {}  # Track the last request time for each channel
+history_expires_seconds = int(get_env('HISTORY_EXPIRES_IN', '900'))  # Use the existing environment variable
+
 CODE_VERSION = "1.0.1"  # Increment this when you make changes
 
 # Global set to track processed file IDs
@@ -128,15 +132,7 @@ except SlackApiError as e:
 
 # ChatGPT configuration
 model = get_env('GPT_MODEL', 'gpt-4')
-system_desc = """You are a helpful assistant specializing in document analysis and information extraction. 
-When asked about documents:
-1. Provide clear, organized summaries
-2. Extract key information accurately
-3. Answer questions about the content directly
-4. Format responses for easy reading and copying
-5. Maintain professional tone
-
-You can also help with general questions and generate images when requested."""
+system_desc = get_env('GPT_SYSTEM_DESC')
 image_size = get_env('GPT_IMAGE_SIZE', '1024x1024')
 
 def log_interaction_to_sheet(user_id, interaction, gpt_reply, channel_id=None, event_type=None, error_info=None, response_time=None):
@@ -317,8 +313,26 @@ def handle_message(body, say):
 		logger.error(f"Error in message handler: {str(e)}", exc_info=True)
 		say("Sorry, I encountered an error processing your request.")
 
-def handle_prompt(prompt, user, channel, thread_ts=None):
+def handle_prompt(prompt, user, channel, thread_ts=None, direct_message=False, in_thread=False):
 	"""Handle all types of prompts."""
+	logger.info(f'Channel {channel} received message: {prompt}')
+
+	# Check if we need to send a loading message
+	if channel not in last_request_datetime:
+		last_request_datetime[channel] = datetime.fromtimestamp(0)
+
+	if last_request_datetime[channel] + timedelta(seconds=history_expires_seconds) < datetime.now():
+		client.chat_postMessage(
+			channel=channel,
+			thread_ts=thread_ts,
+			text=random.choice([
+				'Generating... :gear:',
+				'Beep beep :robot_face:',
+				'hm :thinking_face:',
+				'On it :saluting_face:'
+			])
+		)
+
 	try:
 		start_time = time.time()
 		
