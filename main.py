@@ -101,7 +101,7 @@ CODE_VERSION = "1.0.1"  # Increment this when you make changes
 processed_files = set()
 
 # Define the correct credentials path as a constant at the top of the file
-GOOGLE_CREDS_PATH = 'PATHTOYOURLOGCREDS/google_sheets_creds.json'
+GOOGLE_CREDS_PATH = 'google_sheets_creds.json'
 
 # Set configuration constants
 PDF_CONTEXT_EXPIRES_IN = int(get_env('PDF_CONTEXT_EXPIRES_IN', '3600'))  # 1 hour for PDF contexts
@@ -134,6 +134,87 @@ except SlackApiError as e:
 model = get_env('GPT_MODEL', 'gpt-4')
 system_desc = get_env('GPT_SYSTEM_DESC')
 image_size = get_env('GPT_IMAGE_SIZE', '1024x1024')
+
+# Ensure chat_history is defined at the top
+chat_history = {}
+
+MAX_HISTORY_MESSAGES = 10  # Maximum number of messages to keep in history
+
+# Add these constants at the top with other globals
+CONTEXT_SWITCH_KEYWORDS = {
+	'tone': ['change tone', 'make it more', 'make it less', 'make tone', 'change to'],
+	'modify': ['rewrite', 'rephrase', 'modify', 'update', 'revise'],
+	'email': ['write email', 'draft email', 'compose email', 'email draft']
+}
+
+MAX_TIME_BETWEEN_RELATED_MESSAGES = 300  # 5 minutes in seconds
+
+# Add to global variables
+CONTEXT_TYPES = {
+	'PDF': 'pdf_context',
+	'EMAIL': 'email_context',
+	'CHAT': 'regular_chat'
+}
+
+# Add this function
+def get_current_context_type(channel: str, prompt: str, previous_messages: list) -> str:
+	"""Determine the current context type based on recent interaction."""
+	
+	# If this is an email-related request, switch to email context
+	if any(keyword in prompt.lower() for keyword in CONTEXT_SWITCH_KEYWORDS['email']):
+		return CONTEXT_TYPES['EMAIL']
+	
+	# Check the most recent messages
+	if previous_messages:
+		last_message = previous_messages[-1]
+		# If the last interaction was email-related, stay in email context
+		if any(keyword in last_message['content'].lower() 
+			   for keyword in CONTEXT_SWITCH_KEYWORDS['email']):
+			return CONTEXT_TYPES['EMAIL']
+	
+	# If we're in PDF context but user has started a new conversation type
+	if channel in pdf_contexts:
+		# Check if the current prompt is clearly unrelated to PDF
+		if any(keyword in prompt.lower() for keyword in 
+			   ['write', 'create', 'draft', 'compose', 'generate']):
+			# Clear PDF context as user has moved on
+			del pdf_contexts[channel]
+			return CONTEXT_TYPES['CHAT']
+			
+	# Default to PDF context if it exists
+	if channel in pdf_contexts:
+		return CONTEXT_TYPES['PDF']
+		
+	return CONTEXT_TYPES['CHAT']
+
+def is_related_to_previous(prompt: str, channel: str, previous_messages: list) -> bool:
+	"""Check if the current prompt is related to previous messages."""
+	if not previous_messages:
+		return False
+
+	# Get the current context type
+	current_context = get_current_context_type(channel, prompt, previous_messages)
+	
+	# Check if this is a modification request
+	is_modification = any(
+		keyword in prompt.lower() 
+		for keywords in CONTEXT_SWITCH_KEYWORDS.values() 
+		for keyword in keywords
+	)
+
+	if is_modification:
+		last_message = previous_messages[-1]
+		# If we're in email context, relate modifications to the email
+		if current_context == CONTEXT_TYPES['EMAIL']:
+			return True
+		# If we're in PDF context but the last message wasn't PDF-related,
+		# relate to the last message instead
+		if current_context == CONTEXT_TYPES['PDF']:
+			if any(keyword in last_message['content'].lower() 
+				   for keyword in CONTEXT_SWITCH_KEYWORDS['email']):
+				return True
+	
+	return False
 
 def log_interaction_to_sheet(user_id, interaction, gpt_reply, channel_id=None, event_type=None, error_info=None, response_time=None):
 	"""Log interactions to Google Sheet with proper user identification"""
@@ -186,14 +267,18 @@ def log_interaction_to_sheet(user_id, interaction, gpt_reply, channel_id=None, e
 def handle_pdf(file_info, channel_id, thread_ts=None):
 	"""Process PDF Files."""
 	try:
-		
+		# Clear any existing context first
+		if channel_id in pdf_contexts:
+			del pdf_contexts[channel_id]
+			chat_history[channel_id] = []
+			
 		user_id = file_info.get('shared_by_user')
 		logger.info(f"Processing PDF: {file_info['name']} in channel {channel_id} from user {user_id}")
 
 		slack_client.chat_postMessage(
 			channel=channel_id,
 			thread_ts=thread_ts,
-			text="📄 Processing your PDF, please wait..."
+			text="Disgesting your PDF, please wait...:ramen:"
 		)
 
 		# Get file content
@@ -211,15 +296,18 @@ def handle_pdf(file_info, channel_id, thread_ts=None):
 		if not pdf_text:
 			raise ValueError("No text could be extracted from PDF")
 
-		# Store context
+		# Store context with proper expiration
+		expiration_time = datetime.now(timezone.utc) + timedelta(seconds=PDF_CONTEXT_EXPIRES_IN)
 		pdf_contexts[channel_id] = {
 			'text': pdf_text,
 			'timestamp': datetime.now(timezone.utc),
 			'processing': False,
 			'file_name': file_info.get('name', 'Unknown'),
 			'shared_by_user': user_id,
-			'expires_at': datetime.now(timezone.utc) + timedelta(seconds=PDF_CONTEXT_EXPIRES_IN)
+			'expires_at': expiration_time
 		}
+		
+		logger.info(f"PDF context will expire at {expiration_time} for channel {channel_id}")
 
 		slack_client.chat_postMessage(
 			channel=channel_id,
@@ -317,31 +405,59 @@ def handle_prompt(prompt, user, channel, thread_ts=None, direct_message=False, i
 	"""Handle all types of prompts."""
 	logger.info(f'Channel {channel} received message: {prompt}')
 
-	# Check if we need to send a loading message
-	if channel not in last_request_datetime:
-		last_request_datetime[channel] = datetime.fromtimestamp(0)
+	# Initialize chat history for this channel if it doesn't exist
+	if channel not in chat_history:
+		chat_history[channel] = []
 
-	if last_request_datetime[channel] + timedelta(seconds=history_expires_seconds) < datetime.now():
-		client.chat_postMessage(
-			channel=channel,
-			thread_ts=thread_ts,
-			text=random.choice([
-				'Generating... :gear:',
-				'Beep beep :robot_face:',
-				'hm :thinking_face:',
-				'On it :saluting_face:'
-			])
-		)
+	# Get current context type
+	current_context = get_current_context_type(channel, prompt, chat_history.get(channel, []))
+	
+	# Check if this message is related to previous conversation
+	is_related = is_related_to_previous(prompt, channel, chat_history.get(channel, []))
+
+	# Always show loading message
+	client.chat_postMessage(
+		channel=channel,
+		thread_ts=thread_ts,
+		text=random.choice([
+			'Generating...:robot_ani:',
+            'Beep beep :robot_ani:',
+            'hm :blob_thinking:',
+            'On it :blob-salute:'
+		])
+	)
 
 	try:
 		start_time = time.time()
-		
 		messages = [{"role": "system", "content": system_desc}]
 		
-		if channel in pdf_contexts:
+		# Handle context and history based on context type
+		if current_context == CONTEXT_TYPES['PDF'] and not is_related:
 			pdf_text = pdf_contexts[channel]['text']
-			messages.append({"role": "system", "content": f"Document content: {pdf_text}"})
-		
+			messages.append({
+				"role": "system", 
+				"content": f"Document content: {pdf_text}"
+			})
+		else:
+			recent_history = chat_history[channel][-MAX_HISTORY_MESSAGES:]
+			if recent_history:
+				messages.extend([
+					{k: v for k, v in msg.items() if k != 'timestamp'}
+					for msg in recent_history
+				])
+				if is_related:
+					messages.append({
+						"role": "system",
+						"content": "The user's request is about modifying the previous message. Focus on applying the requested changes to the last response."
+					})
+
+		# Add the current message to history first
+		current_time = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+		chat_history[channel].append({
+			"role": "user", 
+			"content": prompt,
+			"timestamp": current_time
+		})
 		messages.append({"role": "user", "content": prompt})
 
 		response = openai.chat.completions.create(
@@ -352,10 +468,20 @@ def handle_prompt(prompt, user, channel, thread_ts=None, direct_message=False, i
 		)
 
 		reply = response.choices[0].message.content.strip()
-		# Add markdown conversion here
 		reply = convert_to_slack_markdown(reply)
 		
-		# Log the interaction with timing
+		# Add the bot's response to history
+		chat_history[channel].append({
+			"role": "assistant", 
+			"content": reply,
+			"timestamp": current_time
+		})
+
+		# Trim history if it's too long
+		if len(chat_history[channel]) > MAX_HISTORY_MESSAGES:
+			chat_history[channel] = chat_history[channel][-MAX_HISTORY_MESSAGES:]
+
+		# Log the interaction
 		response_time = f"{(time.time() - start_time):.2f}s"
 		log_interaction_to_sheet(
 			user_id=user,
@@ -370,7 +496,6 @@ def handle_prompt(prompt, user, channel, thread_ts=None, direct_message=False, i
 
 	except Exception as e:
 		logger.error(f"Error in handle_prompt: {str(e)}")
-		# Log the error
 		log_interaction_to_sheet(
 			user_id=user,
 			interaction=prompt,
@@ -573,6 +698,24 @@ def convert_to_slack_markdown(text):
 	text = "\n".join(formatted_lines)
 
 	return text
+
+# Add this function to clear expired PDF contexts
+def cleanup_expired_pdf_contexts():
+	"""Clean up expired PDF contexts."""
+	now = datetime.now(timezone.utc)
+	expired_channels = []
+	
+	for channel, context in pdf_contexts.items():
+		# Check if context is expired
+		if 'expires_at' not in context or now > context['expires_at']:
+			expired_channels.append(channel)
+			logger.info(f"PDF context expired for channel {channel}")
+	
+	for channel in expired_channels:
+		del pdf_contexts[channel]
+		if channel in chat_history:
+			chat_history[channel] = []
+		logger.info(f"Cleared expired PDF context and history for channel {channel}")
 
 # Add at the bottom of the file
 if __name__ == "__main__":
